@@ -9,8 +9,23 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
 // Configure the HTTP request pipeline.
+app.Use(async (context, next) =>
+{
+    //Global exception handler and request logger middleware
+    try
+    {
+        await next();
+        Console.WriteLine($"{context.Request.Method} {context.Request.Path} {context.Response.StatusCode}");
+    }
+    catch (Exception ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        Console.WriteLine($"Error occurred for {context.Request.Method} {context.Request.Path} {context.Response.StatusCode}");
+        Console.WriteLine($"Exception details: {ex}");
+    }
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
